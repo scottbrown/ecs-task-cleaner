@@ -1,0 +1,53 @@
+version: '3'
+
+vars:
+  BINARY_NAME: ecs-task-cleaner
+  PKG: github.com/scottbrown/{{.BINARY_NAME}}
+  PWD:
+    sh: pwd
+  BUILD_DIR: "{{.PWD}}/.build"
+  TEST_DIR: "{{.PWD}}/.test"
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
+
+  build:
+    desc: Build the binary
+    cmds:
+      - go build -o {{.BUILD_DIR}}/{{.BINARY_NAME}} {{.PKG}}/cmd/{{.BINARY_NAME}}
+    sources:
+      - ./**/*.go
+    generates:
+      - '{{.BUILD_DIR}}/{{.BINARY_NAME}}'
+
+  test:
+    desc: Run tests
+    cmds:
+      - mkdir -p {{.TEST_DIR}}
+      - go test -v ./...
+
+  coverage:
+    desc: Run tests with coverage
+    cmds:
+      - mkdir -p {{.TEST_DIR}}
+      - go test -coverprofile={{.TEST_DIR}}/coverage.out ./...
+      - go tool cover -html={{.TEST_DIR}}/coverage.out -o {{.TEST_DIR}}/coverage.html
+      - echo "Coverage report generated at coverage.html"
+
+  vet:
+    desc: Discover problems in the code
+    cmds:
+      - go vet ./...
+
+  fmt:
+    desc: Format code
+    cmds:
+      - go fmt ./...
+
+  clean:
+    desc: Clean build artifacts
+    cmds:
+      - rm -rf {{.BUILD_DIR}} {{.TEST_DIR}}
