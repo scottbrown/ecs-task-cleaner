@@ -20,6 +20,7 @@ type Config struct {
 	Keep      int
 	DryRun    bool
 	BatchSize int
+	WaitTime  time.Duration
 }
 
 // Cleaner handles the deletion of old ECS task definitions.
@@ -32,6 +33,9 @@ type Cleaner struct {
 func New(ctx context.Context, cfg Config) (*Cleaner, error) {
 	if cfg.BatchSize < 1 || cfg.BatchSize > 10 {
 		cfg.BatchSize = 10
+	}
+	if cfg.WaitTime <= 0 {
+		cfg.WaitTime = 10 * time.Second
 	}
 
 	awsCfg, err := loadAWSConfig(ctx, cfg.Profile, cfg.Region)
@@ -51,6 +55,9 @@ func New(ctx context.Context, cfg Config) (*Cleaner, error) {
 func NewWithClient(client ECSClient, cfg Config) *Cleaner {
 	if cfg.BatchSize < 1 || cfg.BatchSize > 10 {
 		cfg.BatchSize = 10
+	}
+	if cfg.WaitTime <= 0 {
+		cfg.WaitTime = 10 * time.Second
 	}
 
 	return &Cleaner{
@@ -176,7 +183,7 @@ func (c *Cleaner) deleteTaskDefinitions(ctx context.Context, out io.Writer, arns
 
 		// Rate limiting: pause between batches to avoid throttling
 		if end < total {
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(c.config.WaitTime)
 		}
 	}
 

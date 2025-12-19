@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"time"
 
 	ecstaskcleaner "github.com/scottbrown/ecs-task-cleaner"
 	"github.com/spf13/cobra"
@@ -15,11 +16,12 @@ func main() {
 
 func rootCmd() *cobra.Command {
 	var (
-		profile  string
-		region   string
-		keep     int
-		dryRun   bool
+		profile   string
+		region    string
+		keep      int
+		dryRun    bool
 		batchSize int
+		waitTime  time.Duration
 	)
 
 	cmd := &cobra.Command{
@@ -44,6 +46,7 @@ Example:
 				Keep:      keep,
 				DryRun:    dryRun,
 				BatchSize: batchSize,
+				WaitTime:  waitTime,
 			}
 
 			cleaner, err := ecstaskcleaner.New(cmd.Context(), cfg)
@@ -60,6 +63,7 @@ Example:
 	cmd.Flags().IntVarP(&keep, "keep", "k", 5, "Number of most recent revisions to keep")
 	cmd.Flags().BoolVarP(&dryRun, "dry-run", "n", false, "Show what would be deleted without making changes")
 	cmd.Flags().IntVarP(&batchSize, "batch-size", "b", 10, "Number of task definitions to delete per API call (max 10)")
+	cmd.Flags().DurationVarP(&waitTime, "wait-time", "w", 10*time.Second, "Time to wait between batch deletions")
 
 	return cmd
 }
