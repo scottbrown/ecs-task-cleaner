@@ -91,7 +91,7 @@ task vet
 
 ## Requirements
 
-- Go 1.25+
+- Go 1.27.4+
 - AWS credentials configured (via profile, environment variables, or IAM role)
 - IAM permissions:
   - `ecs:ListTaskDefinitions`
